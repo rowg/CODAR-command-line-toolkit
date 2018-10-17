@@ -1,0 +1,3 @@
+tell application "SeaSondeController"
+	AwgTransmit "Off"
+end tell
