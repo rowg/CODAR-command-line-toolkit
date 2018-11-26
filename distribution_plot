@@ -1,0 +1,44 @@
+#!/bin/bash
+# This script creates distribution plots of ideal and measured radials
+# located in /Codar/SeaSonde/Data/Radials folders and transfers them to
+# another machine.  It is designed to be run on a schedule so that weekly
+# distribution plots from each site are automatically available on an
+# office computer for weekly QC checks and a record of images is kept so
+# comparisons with previous plots can alert the operator to 
+# distribution changes that may indicate problems with the site or pattern
+#
+# If you would like to change plot settings, make the changes to the map in
+# SeaDisplay and this should update the plist file used by SeaDisplayTool.
+#
+# BEFORE RUNNING THE CODE
+# 1) Change the SITE code below. 
+# 2) Change (or create) OUTFOLDER (location for local copy of plot)
+# 3) Change user@xxx.xxx.xxx.xxx to remote user name and IP address
+# 4) Change DESTFOLDER (destination on remote machine)
+
+SITE="VIEW"
+OUTFOLDER="/Codar/SeaSonde/Users/Distribution/"
+DESTFOLDER="/Users/codar/"
+D=`date "+%Y_%m_%d"`
+
+# IDEAL PATTERN FILES
+FOLDER="/Codar/SeaSonde/Data/Radials/IdealPattern/"
+TYPE="i"
+OUTFILE="${OUTFOLDER}DST"${TYPE}"_"${SITE}"_${D}.jpg"
+LIST=`ls ${FOLDER}/RDL"${TYPE}"* | wc -l`
+ if [ ${LIST} -gt 0 ]
+ then
+  /Codar/SeaSonde/Apps/Bin/SeaDisplayTool -i=${FOLDER} -o=${OUTFILE} -distribution -imageformat="JPEG" -imagedepth=32 -showtext -pref="/Codar/SeaSonde/Configs/RadialConfigs/SeaDisplay.plist" -site=${SITE}
+ fi
+scp ${OUTFILE} user@xxx.xxx.xxx.xxx:${DESTFOLDER}.
+
+# MEASURED PATTERN FILES
+FOLDER="/Codar/SeaSonde/Data/Radials/MeasPattern/"
+TYPE="m"
+OUTFILE="${OUTFOLDER}DST"${TYPE}"_"${SITE}"_${D}.jpg"
+LIST=`ls ${FOLDER}/RDL"${TYPE}"* | wc -l`
+ if [ ${LIST} -gt 0 ]
+ then
+  /Codar/SeaSonde/Apps/Bin/SeaDisplayTool -i=${FOLDER} -o=${OUTFILE} -distribution -imageformat="JPEG" -imagedepth=32 -showtext -pref="/Codar/SeaSonde/Configs/RadialConfigs/SeaDisplay.plist" -site=${SITE}
+  fi
+scp ${OUTFILE} user@xxx.xxx.xxx.xxx:${DESTFOLDER}.
