@@ -1,0 +1,54 @@
+#!/bin/bash
+# Two ways to call the script:
+# css_sample XXXX # will pull sample of CSS files from last # days at site XXXX
+#   e.g. css_sample VIEW 3
+# css_sample XXXX 0 "yyyy" "mm" will pull sample of CSS for a default selection 
+#   of days in the given month and year
+#   e.g. css_sample VIEW "2018" "08"
+# See end of script for code you can use to compress and transfer the files
+#   to an office computer. 
+
+CSSFOLDER="/Codar/SeaSonde/Archives/Spectra/*_CSS_"
+OUTDIR="/Users/codar/"
+TIMESTR=('00' '03' '06' '09' '12' '15' '18' '21')
+
+SITE=$1
+NUM=$2
+DASH="_"
+
+# PULL LAST NUM DAYS
+if [[ ${NUM} -gt 0 ]] ; then
+  D="`date -u "+%Y%m%d"`"
+  FOLDERNAME="SPECTRASAMPLE_${SITE}_${D}-${NUM}"
+  rm -R ${OUTDIR}${FOLDERNAME}
+  mkdir ${OUTDIR}${FOLDERNAME}
+
+  for ((i=0;i<${NUM};i++)); do
+   YRSTR="`date -v-${i}d -u "+%Y"`"
+   MONSTR="`date -v-${i}d -u "+%m"`"
+   DATESTR="`date -v-${i}d -u "+%d"`"
+   for ((j=0;j<8;j++)); do
+     cp ${CSSFOLDER}${YRSTR}${DASH}${MONSTR}*/*${DASH}${DATESTR}${DASH}${TIMESTR[${j}]}00.cs /Users/codar/${FOLDERNAME}
+   done
+  done
+
+# PULL SET OF DAYS FROM GIVEN MONTH
+else
+
+ YRSTR=$3
+ MONSTR=$4
+ FOLDERNAME="SPECTRASAMPLE_${SITE}_${YRSTR}_${MONSTR}"
+ rm -R ${OUTDIR}${FOLDERNAME}
+ mkdir ${OUTDIR}${FOLDERNAME}
+ DATESTR=('01' '05' '10' '15' '20' '25' '30')
+ for ((i=0;i<7;i++)); do
+  for ((j=0;j<8;j++)); do
+    cp ${CSSFOLDER}${YRSTR}${DASH}${MONSTR}*/*${DASH}${DATESTR[${i}]}${DASH}${TIMESTR[${j}]}00.cs ${OUTDIR}${FOLDERNAME}
+  done
+ done
+
+fi
+
+# ZIP AND TRANSFER FILES
+#tar cfz ${OUTDIR}${FOLDERNAME}.tgz ${OUTDIR}${FOLDERNAME}
+#scp ${OUTDIR}${FOLDERNAME}.tgz user@xxx.xxx.xxx.xxx:~/.
