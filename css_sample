@@ -1,34 +1,63 @@
 #!/bin/bash
+# css_sample
+# Copies a set of spectra files from the archives into a singe folder for easy 
+# viewing in the SpectraPlotterMap application. 
+#
 # Two ways to call the script:
-# css_sample XXXX # will pull sample of CSS files from last # days at site XXXX
-#   e.g. css_sample VIEW 3
-# css_sample XXXX 0 "yyyy" "mm" will pull sample of CSS for a default selection 
+# Option 1: css_sample XXXX # will pull sample of CSS files from last # days at site XXXX
+#   Example:  ./css_sample VIEW 3
+#   The output folder will be named SPECTRASAMPLE_{site}_{date}-{num_of_days}
+# Option 2: css_sample XXXX 0 "yyyy" "mm" will pull sample of CSS for a default selection 
 #   of days in the given month and year
-#   e.g. css_sample VIEW "2018" "08"
+#   Example:  ./css_sample VIEW 0 "2018" "08"
+#   The output folder will be named SPECTRASAMPLE_{site}_{year}_{month}
+#
+# Update folder names, requested days and times in the adjustable parameter section.
+#
 # See end of script for code you can use to compress and transfer the files
-#   to an office computer. 
+#   to an office computer.
+#
+# Troubleshooting:  
+# If the script didn't run at all, check file permissions.  Run the
+# script from the directory it is located in with ./css_sample or run from any
+# directory with the entire path to the script file, e.g. /Users/codar/css_sample 
+# Uncomment the echo commands to see if the script is looking in the correct location 
+# for files with the correct name.
+# Trouble with option 1 might be caused by differences in how the date
+# command works on the station computer.  The command may require different options.
 
-CSSFOLDER="/Codar/SeaSonde/Archives/Spectra/*_CSS_"
-OUTDIR="/Users/codar/"
-TIMESTR=('00' '03' '06' '09' '12' '15' '18' '21')
+
+### START ADJUSTABLE PARAMETERS ###
+
+OUTDIR="/Users/codar/"  # the output directory ending in "/"
+CSSDIR="/Codar/SeaSonde/Archives/Spectra/"  # the archive directory containing subfolders with CSS files ending in "/"
+DATESTR=('01' '05' '10' '15' '20' '25' '30')  # only used with option 2, pull from these days of the month 
+TIMESTR=('00' '03' '06' '09' '12' '15' '18' '21') # pull from these hours of the day
+
+### END ADJUSTABLE PARAMETERS ###
 
 SITE=$1
 NUM=$2
 DASH="_"
+CSSFOLDER="${CSSDIR}${SITE}_CSS_*"
+DATELEN=${#DATESTR[@]}
+TIMELEN=${#TIMESTR[@]}
 
 # PULL LAST NUM DAYS
 if [[ ${NUM} -gt 0 ]] ; then
   D="`date -u "+%Y%m%d"`"
-  FOLDERNAME="SPECTRASAMPLE_${SITE}_${D}-${NUM}"
-  rm -R ${OUTDIR}${FOLDERNAME}
-  mkdir ${OUTDIR}${FOLDERNAME}
-
+  OUTFOLDERNAME="SPECTRASAMPLE_${SITE}_${D}-${NUM}"
+  rm -R ${OUTDIR}${OUTFOLDERNAME}
+  mkdir ${OUTDIR}${OUTFOLDERNAME}
+  
   for ((i=0;i<${NUM};i++)); do
    YRSTR="`date -v-${i}d -u "+%Y"`"
    MONSTR="`date -v-${i}d -u "+%m"`"
    DATESTR="`date -v-${i}d -u "+%d"`"
-   for ((j=0;j<8;j++)); do
-     cp ${CSSFOLDER}${YRSTR}${DASH}${MONSTR}*/*${DASH}${DATESTR}${DASH}${TIMESTR[${j}]}00.cs /Users/codar/${FOLDERNAME}
+   #echo $i $YRSTR  $MONSTR $DATESTR
+   for ((j=0;j<${TIMELEN};j++)); do
+  #echo ${CSSFOLDER}${YRSTR}${DASH}*/*${DASH}${MONSTR}${DASH}${DATESTR}${DASH}${TIMESTR[${j}]}00*.c* /Users/codar/${OUTFOLDERNAME}
+     cp ${CSSFOLDER}${YRSTR}${DASH}*/*${DASH}${MONSTR}${DASH}${DATESTR}${DASH}${TIMESTR[${j}]}00*.c* /Users/codar/${OUTFOLDERNAME}
    done
   done
 
@@ -37,18 +66,19 @@ else
 
  YRSTR=$3
  MONSTR=$4
- FOLDERNAME="SPECTRASAMPLE_${SITE}_${YRSTR}_${MONSTR}"
- rm -R ${OUTDIR}${FOLDERNAME}
- mkdir ${OUTDIR}${FOLDERNAME}
- DATESTR=('01' '05' '10' '15' '20' '25' '30')
- for ((i=0;i<7;i++)); do
-  for ((j=0;j<8;j++)); do
-    cp ${CSSFOLDER}${YRSTR}${DASH}${MONSTR}*/*${DASH}${DATESTR[${i}]}${DASH}${TIMESTR[${j}]}00.cs ${OUTDIR}${FOLDERNAME}
+ OUTFOLDERNAME="SPECTRASAMPLE_${SITE}_${YRSTR}_${MONSTR}"
+ rm -R ${OUTDIR}${OUTFOLDERNAME}
+ mkdir ${OUTDIR}${OUTFOLDERNAME}
+ 
+ for ((i=0;i<${DATELEN};i++)); do
+  for ((j=0;j<${TIMELEN};j++)); do
+    #echo ${CSSFOLDER}${YRSTR}${DASH}*/*${DASH}${MONSTR}${DASH}${DATESTR[${i}]}${DASH}${TIMESTR[${j}]}00*.c* ${OUTDIR}${OUTFOLDERNAME}
+    cp ${CSSFOLDER}${YRSTR}${DASH}*/*${DASH}${MONSTR}${DASH}${DATESTR[${i}]}${DASH}${TIMESTR[${j}]}00*.c* ${OUTDIR}${OUTFOLDERNAME}
   done
  done
 
 fi
 
 # ZIP AND TRANSFER FILES
-#tar cfz ${OUTDIR}${FOLDERNAME}.tgz ${OUTDIR}${FOLDERNAME}
-#scp ${OUTDIR}${FOLDERNAME}.tgz user@xxx.xxx.xxx.xxx:~/.
+#tar cfz ${OUTDIR}${OUTFOLDERNAME}.tgz ${OUTDIR}${OUTFOLDERNAME}
+#scp ${OUTDIR}${OUTFOLDERNAME}.tgz user@xxx.xxx.xxx.xxx:~/.
