@@ -1,6 +1,6 @@
 #!/bin/bash
 # css_sample
-# Copies a set of spectra files from the archives into a singe folder for easy 
+# Copies a set of spectra files from the archives into a single folder for easy 
 # viewing in the SpectraPlotterMap application. 
 #
 # Two ways to call the script:
