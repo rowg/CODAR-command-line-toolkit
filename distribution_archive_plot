@@ -33,13 +33,25 @@ LIST=`ls ${FOLDER}/RDL"${TYPE}"* | wc -l`
 #scp ${OUTFILE} user@xxx.xxx.xxx.xxx:${DESTFOLDER}.
 
 # MEASURED PATTERN FILES
-FOLDER="/Codar/SeaSonde/Data/Radials/MeasPattern/"
+FOLDER="/Codar/SeaSonde/Archives/Radials/"
 TYPE="m"
-OUTFILE="${OUTFOLDER}DST"${TYPE}"_"${SITE}"_${D}.png"
-LIST=`ls ${FOLDER}/RDL"${TYPE}"* | wc -l`
-ls ${FOLDER}/RDL"${TYPE}"* > /Users/codar/filelist.txt
- if [ ${LIST} -gt 0 ]
- then
-  /Codar/SeaSonde/Apps/Bin/SeaDisplayTool -v -list="/Users/codar/filelist.txt" -o=${OUTFILE} -distribution -imageformat="PNG" -imagedepth=32 -showtext -pref="/Codar/SeaSonde/Configs/RadialConfigs/SeaDisplay.plist" -site=${SITE}
+
+#DATELEN=${#DATESTR[@]}
+#for ((j=0;j<8;j++)); do
+#cd ${FOLDER}
+for d in ${FOLDER}/*RDL"${TYPE}"*/ ; do
+  echo "$d"
+  cd "$d"
+  OUTNAME=`awk -F'/' '{print $7}' <<< $d`
+  OUTFILE=${OUTFOLDER}${OUTNAME}.png
+  #$OUTFILE="DST_$d.png"
+  echo ${OUTFILE}
+  LIST=`ls RDL"${TYPE}"* | wc -l`
+  ls RDL"${TYPE}"* > /Users/codar/filelist.txt
+  if [ ${LIST} -gt 0 ]
+    then
+    /Codar/SeaSonde/Apps/Bin/SeaDisplayTool -v -list="/Users/codar/filelist.txt" -o=${OUTFILE} -distribution -imageformat="PNG" -imagedepth=32 -showtext -pref="/Codar/SeaSonde/Configs/RadialConfigs/SeaDisplay.plist" -site=${SITE}
   fi
-#scp ${OUTFILE} user@xxx.xxx.xxx.xxx:${DESTFOLDER}.
+  #scp ${OUTFILE} user@xxx.xxx.xxx.xxx:${DESTFOLDER}.
+  rm /Users/codar/filelist.txt
+done
